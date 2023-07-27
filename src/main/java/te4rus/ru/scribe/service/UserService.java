@@ -3,9 +3,13 @@ package te4rus.ru.scribe.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import te4rus.ru.scribe.domain.Role;
 import te4rus.ru.scribe.domain.User;
@@ -22,8 +26,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
+    private final ApplicationContext applicationContext;
     private final UserRepository userRepository;
-
     private final RoleRepository roleRepository;
 
 
@@ -50,6 +54,7 @@ public class UserService implements UserDetailsService {
             return false;
         }
 
+        user.setPassword(applicationContext.getBean(PasswordEncoder.class).encode(user.getPassword()));
         user.setRoles(Collections.singleton(new Role(1L, "ROLE_USER")));
         userRepository.save(user);
         log.debug("User success saving");
